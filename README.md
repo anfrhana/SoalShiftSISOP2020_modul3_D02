@@ -167,4 +167,152 @@ printf ("\nHasil perkalian matriks\n");
 4b.Buatlah program C kedua dengan nama "4b.c". Program ini akan mengambil variabel hasil perkalian matriks dari program "4a.c" (program sebelumnya), dan tampilkan hasil matriks tersebut ke layar.(Catatan!: gunakan shared memory).Setelah ditampilkan, berikutnya untuk setiap angka dari matriks tersebut, carilah nilai faktorialnya, dan tampilkan hasilnya ke layar dengan format seperti matriks.Harus menggunakan Thread dalam penghitungan
 faktorial)
 
+Deklarasi variable global
+`int jmlh[10][10];`
+Fungsi untuk melakukan penjumlahan
+```
+void *sum(void *arg)
+{
+    key_t key = 1234;
+    int (*matriks)[10];
+	int *nilai;
+	int i,j,k,angka;
+        int shmid = shmget(key, 20, IPC_CREAT | 0666);
+        nilai =(int *) shmat(shmid, 0, 0);
+	int n = 0;
+	for(i = 0; i < 4; i++)
+	{
+		for(j = 0; j < 5; j++) {
+		matriks[i][j] = nilai[n];
+		n++;	
+		while( n == 19 )break;
+		}
+	}
+	
+	int tmp = 1;
+	for(i = 0; i < 4; i++)
+	{ 
+		for(j = 0; j < 5; j++)
+		{
+			angka = matriks[i][j];
+			for(k = 1; k <= angka; k++)
+			{
+				tmp+=k;
+				jmlh[i][j] = tmp;
+	
+			}
+			tmp = 1;
+		}
+	}
+```
+deklarasi `shmid` pada fungsi `*sum` dengan id yang sama dengan file yang lain sehingga shared memori dapat dilakukan.
+```
+int shmid = shmget(key, 20, IPC_CREAT | 0666);
+nilai = (int *) shmat(shmid, 0, 0);
+```
+Untuk mencetak hasil penjumlahan
+```
+	printf("\nHasil penjumlahan\n");
+	for(i = 0; i < 4; i++)
+	{
+		for(j = 0; j < 5; j++)
+		{
+			printf("%d\t", jmlh[i][j]);
+		}
+		printf("\n");
+	}
+}
+```
+Fungnsi main
+```
+void main()
+{
+    key_t key = 1234;
+    int (*matriks)[10], i, j, *nilai, n = 0;
+
+	int shmid = shmget(key, 20, IPC_CREAT | 0666);
+    nilai = (int *) shmat(shmid, 0, 0);
+	
+	for(i = 0; i < 4; i++)
+	{
+		for(j = 0; j < 5; j++) {
+		matriks[i][j]= nilai[n];
+		n++;
+	while( n == 19 )break;
+	}
+}
+	printf("MATRIKS\n");
+
+	for(i = 0; i < 4; i++)
+	{
+		for(j = 0; j < 5; j++)
+		{
+			printf("%d\t", matriks[i][j]);
+		}
+		printf("\n");
+	}
+
+	pthread_t tid;
+
+	pthread_create(&tid, NULL,&sum, NULL);
+	pthread_join(tid,NULL);
+
+}
+```
+deklarasi `shmid` dengan id yang sama dengan file yang lain sehingga shared memori dapat dilakukan.
+```
+int shmid = shmget(key, 20, IPC_CREAT | 0666);
+nilai = (int *) shmat(shmid, 0, 0);
+```
+Pembuatan hread yang digunakan untuk pehitungan matriks.
+```
+pthread_t tid;
+
+pthread_create(&tid, NULL,&sum, NULL);
+pthread_join(tid,NULL);
+```
+
 4c.Buatlah program C ketiga dengan nama "4c.c". Program ini tidak memiliki hubungan terhadap program yang lalu.Pada program ini, Norland diminta mengetahui jumlah file dan folder di direktori saat ini dengan command "ls | wc -l". Karena sudah belajar IPC, Norland mengerjakannya dengan semangat.(Catatan! : Harus menggunakan IPC Pipes)
+```
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <string.h>
+#include <sys/wait.h>
+
+int main()
+{
+    int folder[2];
+    pid_t id;
+
+    if (pipe(folder)==-1){
+        fprintf(stderr, "pipe gagal dilakukan" );
+        return 1;
+    }
+    id = fork();
+
+    if (id < 0){
+        fprintf(stderr, "fork gagal dilakukan" );
+        return 1;
+    }
+
+    else if (id == 0){
+        close(1);
+        dup(folder[1]);
+        close(folder[0]);
+        
+        char *argm1[] = {"ls", NULL};
+        execv("/bin/ls", argm1);
+    }
+    else{
+        wait(NULL);
+        close(0);
+        dup(folder[0]);
+        close(folder[1]);
+ 
+	char *argm2[] = {"wc", "-l", NULL};
+        execv("/usr/bin/wc", argm2);
+    }
+}
+```
