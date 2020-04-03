@@ -17,7 +17,6 @@ int isdir(const char *path)
 	stat(path, &stat_t);
 	return S_ISREG(stat_t.st_mode);
 }
-
 //fungsi untu mengecek dan memindahkan file
 void* pindah(void *arg) {
 //	strcpy(abc,arg);
@@ -82,26 +81,17 @@ void* pindah(void *arg) {
 	strcat(dirname, namafile);
 	//printf("|--%s\n", namafile);
 	pwrite = fopen(dirname, "w");
-	//jika file tidak dapat dibaca
-	if(!pread) {
-		printf("error\n");
-	}
-	//jika file tidak dapat diisi
-	if(!pwrite) {
-		printf("error\n");
-	}
 
 	int ch;
 	while ((ch = fgetc(pread)) != EOF) {
 		fputc(ch, pwrite);
 	}
-	fclose(pread); //tutup file yang ditun jukpointer pread 
+	fclose(pread); //tutup file yang ditunjukpointer pread 
 	fclose(pwrite); //tutup file yang ditunjuk pointer write
 	remove(a);
 
 	return NULL;
 }
-
 //fungsi untuk memindahkan file dari direktori a ke directori tempat file
 void* pindahd(void *arg) {
 	char *path;
@@ -154,12 +144,6 @@ void* pindahd(void *arg) {
 	strcat(dirname, namafile);
 	pwrite = fopen(dirname, "w");
 
-	if(!pread) {
-		printf("error\n");
-	}
-	if(!pwrite) {
-		printf("error\n");
-	}
 //	char source[1024], target[1024];
 
 //	strcpy(source,arg);
