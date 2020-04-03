@@ -126,10 +126,12 @@ int main(int argc, char **argv)
 }
 
 ```
+
 ``` int shmid = shmget(key, 20, IPC_CREAT | 0666);
     nilai = (int *)shmat(shmid, 0, 0);
 ```
-` pthread_t tid;`
+` pthread_t tid;` deklarasi thread.
+thread akan digunakan untuk mengambil nilai yang ada pada struct yang kemudian akan digunakan untuk variable dan hasil nya disimpan dalam `matC[][]` .
 ```
  for (i = 0; i < 4; i++)
     {
@@ -143,7 +145,7 @@ int main(int argc, char **argv)
             pthread_join(tid, NULL);
         }
     }
-    ```
+```
 mencetak hasil perkalian 2 matriks
 ```
 printf ("\nHasil perkalian matriks\n");
@@ -157,7 +159,7 @@ printf ("\nHasil perkalian matriks\n");
         }
         printf("\n");
     }
-    ```
+ ```
 ` shmdt((void *) nilai);` digunakan untuk melepaskan shared memori.
 
 4b.Buatlah program C kedua dengan nama "4b.c". Program ini akan mengambil variabel hasil perkalian matriks dari program "4a.c" (program sebelumnya), dan tampilkan hasil matriks tersebut ke layar.(Catatan!: gunakan shared memory).Setelah ditampilkan, berikutnya untuk setiap angka dari matriks tersebut, carilah nilai faktorialnya, dan tampilkan hasilnya ke layar dengan format seperti matriks.Harus menggunakan Thread dalam penghitungan
