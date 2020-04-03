@@ -31,6 +31,135 @@ Setiap 1 file yang dikategorikan dioperasikan oleh 1 thread agar bisa berjalan s
 
 4a.Buatlah program C dengan nama "4a.c", yang berisi program untuk melakukan perkalian matriks. Ukuran matriks pertama adalah 4x2, dan matriks kedua 2x5. Isi dari matriks didefinisikan di dalam kodingan. Matriks nantinya akan berisi angka 1-20 (tidak perlu dibuat filter angka).Tampilkan matriks hasil perkalian tadi ke layar.
 
+dibuat 3 variable matriks, 2 matriks digunakan untuk menyimpam nilai matriks yang akan dikalikan, matriks satu lagi digunakan untuk menyimpan hasil dari kedua matriks yang telah dikalikan.
+
+```
+int matA[4][2] = {{1, 2}, 
+		  {3, 4}, 
+		  {1, 1},
+		  {1, 6}};
+int matB[2][5] = {{5, 6, 7, 8, 1},
+		  {9, 1, 8, 1, 1}};
+int matC[4][5];
+```
+Dibuat sebuah struct untuk menyimpan indeks matriks.
+```
+struct matriks
+{
+    int i;
+    int j; 
+};
+```
+fungsi untuk melakukan perkalian dua buah matriks.
+```
+void *mult(void *ptr)
+{    
+    struct matriks *data = ptr;
+    int i, sum = 0;
+    
+    for(i = 0; i < 2; i++)
+    {  
+//	printf("%d %d\n", data->i, data->j); 
+        sum += matA[data->i][i] * matB[i][data->j];
+    }
+    
+    matC[data->i][data->j] = sum;
+    pthread_exit(0);
+}
+```
+fungsi main
+```
+int main(int argc, char **argv)
+{
+    int i, j ,n = 0,cnt = 0, *nilai;
+    key_t key = 1234;
+
+    printf ("Matriks A\n");
+    for (i = 0; i < 4; i++){
+	for (j = 0; j < 2; j++){
+        printf ("%d\t", matA[i][j]);
+    }
+	printf("\n");
+    }
+
+    printf ("\nMatriks B\n");
+    for (i = 0; i < 2; i++){
+	for (j = 0; j < 5; j++){
+        printf ("%d\t", matB[i][j]);
+    }
+	printf("\n");
+    }
+
+    int shmid = shmget(key, 20, IPC_CREAT | 0666);
+    nilai = (int *)shmat(shmid, 0, 0);
+
+    pthread_t tid;
+
+    for (i = 0; i < 4; i++)
+    {
+        for (j = 0; j < 5; j++) 
+        {
+            struct matriks *data = (struct matriks *) malloc(sizeof(struct matriks));
+            data->i = i;
+            data->j = j;
+	
+            pthread_create(&tid, NULL, mult, data);
+            pthread_join(tid, NULL);
+        }
+    }
+
+    printf ("\nHasil perkalian matriks\n");
+    for(i = 0; i < 4; i++)
+    { 
+        for(j = 0; j < 5; j++)
+        { 
+            printf("%d\t", matC[i][j]);
+            nilai[n] = matC[i][j];
+            n++;
+        }
+        printf("\n");
+    }
+
+    shmdt((void *) nilai);
+
+    return 0;
+}
+
+```
+``` int shmid = shmget(key, 20, IPC_CREAT | 0666);
+    nilai = (int *)shmat(shmid, 0, 0);
+```
+` pthread_t tid;`
+```
+ for (i = 0; i < 4; i++)
+    {
+        for (j = 0; j < 5; j++) 
+        {
+            struct matriks *data = (struct matriks *) malloc(sizeof(struct matriks));
+            data->i = i;
+            data->j = j;
+	
+            pthread_create(&tid, NULL, mult, data);
+            pthread_join(tid, NULL);
+        }
+    }
+    ```
+mencetak hasil perkalian 2 matriks
+```
+printf ("\nHasil perkalian matriks\n");
+    for(i = 0; i < 4; i++)
+    { 
+        for(j = 0; j < 5; j++)
+        { 
+            printf("%d\t", matC[i][j]);
+            nilai[n] = matC[i][j];
+            n++;
+        }
+        printf("\n");
+    }
+    ```
+` shmdt((void *) nilai);` digunakan untuk melepaskan shared memori.
+
 4b.Buatlah program C kedua dengan nama "4b.c". Program ini akan mengambil variabel hasil perkalian matriks dari program "4a.c" (program sebelumnya), dan tampilkan hasil matriks tersebut ke layar.(Catatan!: gunakan shared memory).Setelah ditampilkan, berikutnya untuk setiap angka dari matriks tersebut, carilah nilai faktorialnya, dan tampilkan hasilnya ke layar dengan format seperti matriks.Harus menggunakan Thread dalam penghitungan
 faktorial)
 
