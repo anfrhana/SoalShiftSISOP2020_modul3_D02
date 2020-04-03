@@ -126,10 +126,12 @@ int main(int argc, char **argv)
 }
 
 ```
-
-``` int shmid = shmget(key, 20, IPC_CREAT | 0666);
-    nilai = (int *)shmat(shmid, 0, 0);
+mendeklarasi `shmid` yang digunakan sebagai id memori bersama saat dilakukan shared memory.
 ```
+int shmid = shmget(key, 20, IPC_CREAT | 0666);
+nilai = (int *)shmat(shmid, 0, 0);
+```
+
 ` pthread_t tid;` deklarasi thread.
 thread akan digunakan untuk mengambil nilai yang ada pada struct yang kemudian akan digunakan untuk variable dan hasil nya disimpan dalam `matC[][]` .
 ```
