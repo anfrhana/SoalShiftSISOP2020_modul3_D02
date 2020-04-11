@@ -101,15 +101,20 @@ else if(strcmp(argv[1], "-d") == 0 && argc == 3) {
 
 Program ini tidak rekursif. Semisal di directory yang mau dikategorikan, atau menggunakan `*` terdapat folder yang berisi file, maka file dalam folder tersebut tidak dihiraukan, cukup file pada 1 level saja.
 Setiap 1 file yang dikategorikan dioperasikan oleh 1 thread agar bisa berjalan secara paralel sehingga proses kategori bisa berjalan lebih cepat. Dilarang menggunakan fork-exec dan system.
+fungsi untuk mengecek apakah sebuah direktori atau bukan
+```
+int isdir(const char *path)
+{
+	struct stat stat_t;
+	stat(path, &stat_t);
+	return S_ISREG(stat_t.st_mode);
+}
+```
 
 fungsi untuk mengecek dan memindahan file
+Dimana nantinya akan membuka kedua path yang sudah di dapatkan sebelumnya. file yang lama dibuka dalam mode read dan file baru kemudian akan dibuat dengan menggunakan write. Lalu semua isi yang ada pada file lama akan dipindah kan dengan menggunakan `fputc( )`. kemudian delet file lama dengan `remove()`.
 ```
 void* pindah(void *arg) {
-//	strcpy(abc,arg);
-//	char *flag,*flag2;
-
-//	unsigned long i=0;
-//	pthread_t id = pthread_self();
 	char *path;
 	char format[100], dirname[100], a[100], b[100], namafile[100];
 	
@@ -231,22 +236,6 @@ void* pindahd(void *arg) {
 	strcat(dirname, "/");
 	strcat(dirname, namafile);
 	pwrite = fopen(dirname, "w");
-
-//	char source[1024], target[1024];
-
-//	strcpy(source,arg);
-//	strcpy(target,workdir);
-//	strcat(target,"/");
-//	if(n == 1 ){
-//		strcat(target,"Unknown");
-//	}
-//	else{
-//		strcat(target,namafile);
-//	}
-//		strcat(target,"/");
-//		strcat(target,arr3);
-//		rename(source,target);
-
 	return NULL;
 	int ch;
 	while ((ch = fgetc(pread)) != EOF) {
